@@ -64,8 +64,8 @@ pipeline {
         stage('6. Deploy to Render') {
             steps {
                 echo 'Triggering Deployment on Render...'
-                // Windows uses curl native command utility tool out-of-the-box
-                bat "curl -X POST \"${RENDER_DEPLOY_HOOK}\""
+                // Bypasses the Windows-specific certificate revocation check quirk
+                bat "curl --ssl-no-revoke -X POST \"${RENDER_DEPLOY_HOOK}\""
             }
         }
     }
