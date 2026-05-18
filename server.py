@@ -1,7 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import os  # Added to read environment variables from Render
 
-PORT = 8000
+# Render dynamically assigns a port via the PORT environment variable.
+# If running locally, it will default to 8000.
+PORT = int(os.environ.get("PORT", 8000))
 
 
 class MyHandler(BaseHTTPRequestHandler):
@@ -73,8 +76,10 @@ class MyHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
 
-server = HTTPServer(('localhost', PORT), MyHandler)
+# CRITICAL CHANGE: Replacing 'localhost' with '' binds the server to 0.0.0.0.
+# This opens the server up so Render's external load balancer can route web traffic into it.
+server = HTTPServer(('', PORT), MyHandler)
 
-print(f"Server running at http://localhost:{PORT}")
+print(f"Server running on port {PORT}...")
 
 server.serve_forever()
