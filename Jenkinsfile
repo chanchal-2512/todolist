@@ -17,13 +17,18 @@ pipeline {
 
         stage('2. Code Quality Analysis') {
             steps {
-                echo 'Running Python Static Code Analysis via Flake8...'
-                // Using 'bat' instead of 'sh' for Windows environments
-                bat '''
-                    pip install flake8 --quiet
-                    flake8 . --max-line-length=120 --exit-zero > code-quality-report.txt
-                '''
-                archiveArtifacts artifacts: 'code-quality-report.txt', allowEmptyArchive: true
+                echo 'Running Code Quality Analysis via SonarQube (SonarCloud)...'
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_KEY')]) {
+                    // Spin up the official scanner container to read your code workspace
+                    bat """
+                        docker run --rm -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli \
+                        -Dsonar.projectKey=chanchal-2512_todolist \
+                        -Dsonar.organization=chanchal-2512 \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=https://sonarcloud.io \
+                        -Dsonar.token=%SONAR_KEY%
+                    """
+                }
             }
         }
 
