@@ -6,9 +6,6 @@ pipeline {
         DOCKER_HUB_USER = 'chanchal2512' 
         IMAGE_NAME      = 'todo-app'
         IMAGE_TAG       = "${BUILD_NUMBER}"
-        
-        // Render Deploy Hook URL (From your Render service settings)
-        RENDER_DEPLOY_HOOK = 'https://api.render.com/deploy/srv-xxxxxxxxxxxxxxx?key=xxxxxxxxx'
     }
 
     stages {
@@ -70,11 +67,12 @@ pipeline {
                 }
             }
         }
+    } // Closes stages
     
     post {
         always {
             echo 'Pipeline execution finished.'
             cleanWs()
         }
-    }
-}
+    } // Closes post
+} // Closes pipeline
