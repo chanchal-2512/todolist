@@ -64,11 +64,12 @@ pipeline {
         stage('6. Deploy to Render') {
             steps {
                 echo 'Triggering Deployment on Render...'
-                // Bypasses the Windows-specific certificate revocation check quirk
-                bat "curl --ssl-no-revoke -X POST \"${RENDER_DEPLOY_HOOK}\""
+                withCredentials([string(credentialsId: 'RENDER_DEPLOY_HOOK', variable: 'RENDER_HOOK')]) {
+                    // For Windows (bat) environments:
+                    bat "curl --ssl-no-revoke -X POST \"%RENDER_HOOK%\""
+                }
             }
         }
-    }
     
     post {
         always {
