@@ -21,9 +21,14 @@ pipeline {
 
         stage('2. Code Quality Analysis') {
             steps {
-                echo 'Running Code Quality Analysis via SonarQube Docker container...'
-                // Alternate lightweight option: running an linting tool directly
-                sh 'echo "Analyzing code syntax and structures..."'
+                echo 'Running Python Static Code Analysis...'
+                // Install a linting tool and run it over your Python files, saving results to a log
+                sh '''
+                    pip install flake8 --quiet
+                    flake8 . --max-line-length=120 --exit-zero > code-quality-report.txt
+                '''
+                // Archive the generated report as a lab deliverable artifact
+                archiveArtifacts artifacts: 'code-quality-report.txt', allowEmptyArchive: true
             }
         }
 
