@@ -53,8 +53,8 @@ pipeline {
             steps {
                 echo 'Pushing Image to Docker Hub...'
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    // Windows login requires escaping variables slightly differently
-                    bat "echo %PASS% | docker login -u %USER% --password-stdin"
+                    // Moving the pipe directly against the variable prevents trailing space injection
+                    bat "echo %PASS%| docker login -u %USER% --password-stdin"
                     bat "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
                     bat "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
                 }
