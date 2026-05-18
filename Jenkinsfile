@@ -21,7 +21,8 @@ pipeline {
         stage('2. Code Quality Analysis') {
             steps {
                 echo 'Running Python Static Code Analysis via Flake8...'
-                sh '''
+                // Using 'bat' instead of 'sh' for Windows environments
+                bat '''
                     pip install flake8 --quiet
                     flake8 . --max-line-length=120 --exit-zero > code-quality-report.txt
                 '''
@@ -32,7 +33,8 @@ pipeline {
         stage('3. Vulnerability Scanning') {
             steps {
                 echo 'Scanning dependencies for vulnerabilities with Trivy...'
-                sh 'docker run --rm -v $(pwd):/apps aquasec/trivy fs /apps > trivy-report.txt'
+                // Using Windows style paths for Docker volume mounting
+                bat 'docker run --rm -v "%cd%:/apps" aquasec/trivy fs /apps > trivy-report.txt'
                 archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
             }
         }
@@ -42,7 +44,7 @@ pipeline {
                 echo 'Building Docker Image...'
                 script {
                     appImage = docker.build("${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}")
-                    sh "docker tag ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
+                    bat "docker tag ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
                 }
             }
         }
@@ -51,9 +53,10 @@ pipeline {
             steps {
                 echo 'Pushing Image to Docker Hub...'
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
-                    sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
+                    // Windows login requires escaping variables slightly differently
+                    bat "echo %PASS% | docker login -u %USER% --password-stdin"
+                    bat "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    bat "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
                 }
             }
         }
@@ -61,7 +64,8 @@ pipeline {
         stage('6. Deploy to Render') {
             steps {
                 echo 'Triggering Deployment on Render...'
-                sh "curl -X POST '${RENDER_DEPLOY_HOOK}'"
+                // Windows uses curl native command utility tool out-of-the-box
+                bat "curl -X POST \"${RENDER_DEPLOY_HOOK}\""
             }
         }
     }
