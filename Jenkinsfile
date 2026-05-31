@@ -35,8 +35,15 @@ pipeline {
         stage('3. Vulnerability Scanning') {
             steps {
                 echo 'Scanning dependencies for vulnerabilities with Trivy...'
-                // Using Windows style paths for Docker volume mounting
-                bat 'docker run --rm -v "%cd%:/apps" aquasec/trivy fs /apps > trivy-report.txt'
+                bat """
+                    docker run --rm ^
+                    -v "%cd%:/apps" ^
+                    aquasec/trivy fs ^
+                    --exit-code 0 ^
+                    --scanners vuln ^
+                    --format table ^
+                    /apps > trivy-report.txt 2>&1
+                """
                 archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
             }
         }
