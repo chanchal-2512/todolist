@@ -35,7 +35,7 @@ pipeline {
         stage('3. Vulnerability Scanning') {
             steps {
                 echo 'Scanning dependencies for vulnerabilities with Trivy...'
-                bat "docker run --rm -v \"%cd%:/project\" aquasec/trivy fs --scanners vuln --exit-code 0 --format table /project > trivy-report.txt 2>&1 || exit 0"
+                bat "docker run --rm -v \"%cd%:/project\" aquasec/trivy fs --scanners vuln --exit-code 0 --format table --list-all-pkgs /project/requirements.txt > trivy-report.txt 2>&1 || exit 0"
                 archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
             }
         }
